@@ -1,9 +1,12 @@
 import flask
 from flask import Flask, request, g
 import sqlite3 as sql
+from flask_cors import CORS, cross_origin
+
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
+CORS(app)
 
 def get_db():
     db = getattr(g, '_database', None)
@@ -13,6 +16,7 @@ def get_db():
     return db
 
 from views.login import *
+from views.books import *
 
 if __name__ == '__main__':
 	app.run(use_reloader=True)

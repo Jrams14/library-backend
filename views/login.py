@@ -14,7 +14,11 @@ def login():
 	if librarian and check_password_hash(librarian['password'], data['password']):
 		response_object = {
 			'status' : 'success',
-			'librarianId' : librarian['ID']
+			'id' : librarian['ID']
 		}
-
+	else:
+		response_object = {
+			'status' : 'fail',
+			'message' : 'Incorrect credentials'
+		}
 	return jsonify(response_object)
