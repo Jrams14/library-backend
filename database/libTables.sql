@@ -39,6 +39,6 @@ CREATE TABLE book (ISBN varchar(13) NOT NULL,
 					  title char(50) NOT NULL,
 					  year INT NOT NULL,
 					  pages INT NOT NULL,
+					  numOfCopies INT NOT NULL,
 					  PRIMARY KEY(ISBN));
-
 PRAGMA foreign_keys=on;

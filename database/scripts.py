@@ -18,3 +18,10 @@ def insertLibrarian(username, phone, email, password):
 	cur.execute("INSERT INTO librarian (username, phone, email, password) VALUES (?,?,?,?)", (username, phone, email, hashed_password))
 	con.commit()
 	con.close()
+
+def insertBook(ISBN, author, title, year, pages, numOfCopies):
+	con = sqlite3.connect("library.db")
+	cur = con.cursor()
+	cur.execute("INSERT INTO book (ISBN, author, title, year, pages, numOfCopies) VALUES (?,?,?,?,?,?)", (ISBN, author, title, year, pages, numOfCopies))
+	con.commit()
+	con.close()
