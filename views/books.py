@@ -41,3 +41,23 @@ def addBook():
             'status': 'fail',
         }
         return jsonify(response_object)
+
+@app.route('/addUser', methods=['POST'])
+def addUser():
+    data = request.get_json()
+    try:
+        db = get_db()
+        cur = db.cursor()
+        cur.execute("INSERT INTO member(name, phone, email, balance) VALUES (?,?,?,?)", (data['name'], data['phone'], data['email'], data['balance']))
+        db.commit()
+        response_object = {
+            'status': 'success'
+        }
+
+        return jsonify(response_object)
+    except:
+        response_object = {
+            'status': 'fail'
+        }
+        
+        return jsonify(response_object)
