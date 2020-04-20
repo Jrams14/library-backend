@@ -38,6 +38,26 @@ def checkout_book():
         
         return jsonify(response_object)
 
+@app.route('/addBook', methods=['POST'])
+def addBook():
+    data = request.get_json()
+    try:
+        db = get_db()
+        cur = db.cursor()
+        cur.execute("INSERT INTO book(ISBN, author, title, year, pages, numOfCopies) VALUES (?,?,?,?,?,?)" , (data['ISBN'], data['author'], data['title'], data['year'], data['pages'], data['numOfCopies']))
+        db.commit()
+        response_object = {
+            'status': 'success'
+        }
+        return jsonify(response_object)
+
+    except:
+        response_object = {
+            'status': 'fail',
+        }
+        return jsonify(response_object)
+
+
 @app.route('/return', methods = ["POST"])
 def returnBook():
     data = request.get_json()
@@ -52,6 +72,7 @@ def returnBook():
         db.commit()
         loan = cur.fetchone()
         
+        # Create fine if returned past due date
         return_date = dateutil.parser.parse(loan['due_date']).date()
         if return_date < date.today():
             amount = (date.today() - return_date).days * 0.5

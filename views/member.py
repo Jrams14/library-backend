@@ -1,6 +1,26 @@
 from app import app, get_db
 from flask import Flask, request, jsonify, make_response
 
+@app.route('/addUser', methods=['POST'])
+def addMember():
+    data = request.get_json()
+    try:
+        db = get_db()
+        cur = db.cursor()
+        cur.execute("INSERT INTO member(name, phone, email, balance) VALUES (?,?,?,?)", (data['name'], data['phone'], data['email'], data['balance']))
+        db.commit()
+        response_object = {
+            'status': 'success'
+        }
+
+        return jsonify(response_object)
+    except:
+        response_object = {
+            'status': 'fail'
+        }
+        
+        return jsonify(response_object)
+
 @app.route('/status/<m_id>', methods = ['GET'])
 def getStatus(m_id):
     db = get_db()
