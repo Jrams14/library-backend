@@ -17,6 +17,7 @@ def get_db():
 
 from views.login import *
 from views.books import *
+from views.member import *
 
 if __name__ == '__main__':
 	app.run(use_reloader=True)

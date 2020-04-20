@@ -9,7 +9,7 @@ PRAGMA foreign_keys=off;
 
 CREATE TABLE fine (l_id INTEGER,
 					  amount INT NOT NULL,
-                      status INT NOT NULL,
+                      status varchar(13) NOT NULL,
                       PRIMARY KEY(l_id),
                       FOREIGN KEY (l_id) REFERENCES loan(ID));
 CREATE TABLE loan (ID INTEGER PRIMARY KEY,
@@ -18,9 +18,13 @@ CREATE TABLE loan (ID INTEGER PRIMARY KEY,
                       checkout_date DATE,
                       due_date DATE NOT NULL,
                       l_id INT NOT NULL,
-                      FOREIGN KEY(b_id) REFERENCES bookItem(ID),
-                      FOREIGN KEY(m_id) REFERENCES member(ID),
-					  FOREIGN KEY(l_id) REFERENCES librarian(ID));
+					  status varchar(13) NOT NULL,
+                      FOREIGN KEY(b_id) REFERENCES bookItem(ID)
+					  ON DELETE NO ACTION,
+                      FOREIGN KEY(m_id) REFERENCES member(ID)
+					  ON DELETE NO ACTION,
+					  FOREIGN KEY(l_id) REFERENCES librarian(ID)
+					  ON DELETE NO ACTION);
 CREATE TABLE librarian (ID INTEGER PRIMARY KEY,
 					  username TEXT NOT NULL,
                       phone varchar(22) NOT NULL,
