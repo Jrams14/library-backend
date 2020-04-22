@@ -28,7 +28,7 @@ def getStatus(m_id):
 
     try:
         # Retrieve member info
-        cur.execute('SELECT * FROM member where ID = ?', (m_id))
+        cur.execute('SELECT * FROM member where m_id = ?', (m_id))
         member = cur.fetchone()
 
         member_data = {}
@@ -36,11 +36,11 @@ def getStatus(m_id):
         member_data['balance'] = member['balance']
 
         # Retrieve members current loans
-        cur.execute("SELECT * FROM loan INNER JOIN bookItem on loan.b_id = bookItem.ID INNER JOIN book on bookItem.isbn = book.ISBN WHERE loan.m_id = ? AND loan.status = 'active'", (m_id))
+        cur.execute("SELECT * FROM loan INNER JOIN bookItem on loan.b_id = bookItem.bi_id NATURAL JOIN book WHERE loan.m_id = ? AND loan.status = 'active'", (m_id))
         loans = cur.fetchall()
 
         # Retrieve the members fines
-        cur.execute("SELECT * FROM fine INNER JOIN loan on fine.l_id = loan.ID WHERE loan.m_id = ?", (m_id))
+        cur.execute("SELECT * FROM fine INNER JOIN loan on fine.l_id = loan.l_id WHERE loan.m_id = ? AND fine.status = 'active'", (m_id))
         fines = cur.fetchall()
 
         loans_output = []
@@ -56,6 +56,7 @@ def getStatus(m_id):
         for fine in fines:
             data = {}
             data['amount'] = fine['amount']
+            data['status']
             fines_output.append(data)
         
         response_object = {
@@ -73,13 +74,3 @@ def getStatus(m_id):
             'status': 'fail'
         }
         return jsonify(response_object)
-
-
-
-
-
-
-    for row in cur:
-        print(row['name'])
-
-    return 'success'
