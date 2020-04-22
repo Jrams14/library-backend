@@ -11,7 +11,7 @@ def checkout_book():
         cur = db.cursor()
 
         # Check if book is already checked out by a member
-        cur.execute("SELECT * FROM loan where b_id=? AND status='active'", (data['b_id']))
+        cur.execute("SELECT * FROM loan where b_id= ? AND status='active'", (data['b_id']))
         db.commit()
 
         loaned_book = cur.fetchone()
@@ -22,7 +22,7 @@ def checkout_book():
             }
             return jsonify(response_object)
 
-        cur.execute("INSERT INTO loan(b_id, m_id, checkout_date, due_date, l_id, status) VALUES (?,?,?,?,?,?)", (data['b_id'], data['m_id'], date.today(), data['return_date'], data['l_id'], 
+        cur.execute("INSERT INTO loan(b_id, m_id, checkout_date, due_date, librarian_id, status) VALUES (?,?,?,?,?,?)", (data['b_id'], data['m_id'], date.today(), data['return_date'], data['l_id'], 
         'active'))
         db.commit()
         response_object = {
@@ -66,8 +66,8 @@ def returnBook():
         db = get_db()
         cur = db.cursor()
 
-        cur.execute("UPDATE loan SET status = 'complete' WHERE b_id = ?", data["b_id"])
-        cur.execute("SELECT * FROM loan where b_id = ?", data["b_id"])
+        cur.execute("UPDATE loan SET status = 'complete' WHERE bi_id = ?", data["bi_id"])
+        cur.execute("SELECT * FROM loan where bi_id = ?", data["bi_id"])
 
         db.commit()
         loan = cur.fetchone()
@@ -76,7 +76,7 @@ def returnBook():
         return_date = dateutil.parser.parse(loan['due_date']).date()
         if return_date < date.today():
             amount = (date.today() - return_date).days * 0.5
-            cur.execute('INSERT INTO fine (amount, status) VALUES(?, ?)', (amount, 'active'))
+            cur.execute('INSERT INTO fine (l_id, amount, status) VALUES(?, ?, ?)', [loan['l_id'], amount, 'active'])
             db.commit()
 
         cur.close()
@@ -92,5 +92,61 @@ def returnBook():
             'status': 'fail'
         }
         return jsonify(response_object)
-       
+
+@app.route('/search', methods = ["POST"])
+def searchBook():
+    data = request.get_json()
+
+    db = get_db()
+    cur = db.cursor()
+
+    print(data['title'])
+
+    cur.execute("SELECT * FROM book where title LIKE ? ", ['%' + data['title'] + '%'])
+
+    books = cur.fetchall()
+
+    books_output = []
+    for book in books:
+        book_data = {}
+        book_data['ISBN'] = book['ISBN']
+        book_data['title'] = book['title']
+        book_data['author'] = book['author']
+        book_data['year'] = book['year']
+        books_output.append(book_data)
+    
+    response_object = {
+        'status': 'success',
+        'books': books_output
+    }
+
+    return jsonify(response_object)
+
+@app.route('/frequent', methods = ["GET"])
+def getFrequentBooks():
+    db = get_db()
+    cur = db.cursor()
+
+    try:
+        cur.execute('SELECT title, author, year FROM (SELECT *, COUNT(*) as count  FROM loan INNER JOIN bookItem on loan.b_id =  bookItem.bi_id INNER JOIN book on bookItem.ISBN = book.ISBN  GROUP BY b_id ORDER BY count LIMIT 10)')
+
+        books = cur.fetchall()
+
+        books_output = []
+        for book in books:
+            book_data = {}
+            book_data['title'] = book['title']
+            book_data['author'] = book['author']
+            book_data['year'] = book['year']
+            books_output.append(book_data)
         
+        response_object = {
+            'status': 'success',
+            'books': books_output
+        }
+    except Exception as ex:
+        print(ex)
+
+    return jsonify(response_object)
+    
+   

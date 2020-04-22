@@ -9,12 +9,11 @@ def login():
 	cur = get_db().cursor()
 	cur.execute('SELECT * FROM librarian WHERE username = ?', [data['username']])
 	librarian = cur.fetchone()
-	print(librarian)
 
 	if librarian and check_password_hash(librarian['password'], data['password']):
 		response_object = {
 			'status' : 'success',
-			'id' : librarian['ID']
+			'id' : librarian['librarian_id']
 		}
 	else:
 		response_object = {
