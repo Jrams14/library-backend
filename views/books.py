@@ -102,7 +102,7 @@ def searchBook():
 
     print(data['title'])
 
-    cur.execute("SELECT * FROM book where title LIKE ? ", ['%' + data['title'] + '%'])
+    cur.execute("SELECT * FROM book where title LIKE ? ", [data['title'] + '%'])
 
     books = cur.fetchall()
 

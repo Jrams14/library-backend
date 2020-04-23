@@ -1,7 +1,7 @@
 from app import app, get_db
 from flask import Flask, request, jsonify, make_response
 
-@app.route('/addUser', methods=['POST'])
+@app.route('/addMember', methods=['POST'])
 def addMember():
     data = request.get_json()
     try:
