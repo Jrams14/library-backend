@@ -128,7 +128,7 @@ def getFrequentBooks():
     cur = db.cursor()
 
     try:
-        cur.execute('SELECT title, author, year FROM (SELECT *, COUNT(*) as count  FROM loan INNER JOIN bookItem on loan.b_id =  bookItem.bi_id INNER JOIN book on bookItem.ISBN = book.ISBN  GROUP BY b_id ORDER BY count LIMIT 10)')
+        cur.execute('SELECT title, author, year FROM (SELECT *, COUNT(*) as count  FROM loan INNER JOIN bookItem on loan.bi_id = bookItem.bi_id INNER JOIN book on bookItem.ISBN = book.ISBN  GROUP BY book.ISBN ORDER BY count LIMIT 5)')
 
         books = cur.fetchall()
 
@@ -144,9 +144,12 @@ def getFrequentBooks():
             'status': 'success',
             'books': books_output
         }
+        return jsonify(response_object)
     except Exception as ex:
         print(ex)
-
-    return jsonify(response_object)
+        response_object = {
+            'status': 'fail'
+        }
+        return jsonify(response_object)
     
    

@@ -36,7 +36,7 @@ def getStatus(m_id):
         member_data['balance'] = member['balance']
 
         # Retrieve members current loans
-        cur.execute("SELECT * FROM loan INNER JOIN bookItem on loan.b_id = bookItem.bi_id NATURAL JOIN book WHERE loan.m_id = ? AND loan.status = 'active'", (m_id))
+        cur.execute("SELECT * FROM loan INNER JOIN bookItem on loan.bi_id = bookItem.bi_id NATURAL JOIN book WHERE loan.m_id = ? AND loan.status = 'active'", (m_id))
         loans = cur.fetchall()
 
         # Retrieve the members fines
@@ -46,17 +46,17 @@ def getStatus(m_id):
         loans_output = []
         for loan in loans:
             data = {}
-            data['b_id'] = loan['b_id']
+            data['bi_id'] = loan['bi_id']
+            data['ISBN'] = loan['ISBN']
             data['title'] = loan['title']
             data['author'] = loan['author']
-            data['return_date'] = loan['due_date']
             loans_output.append(data)
 
         fines_output = []
         for fine in fines:
             data = {}
             data['amount'] = fine['amount']
-            data['status']
+            data['status'] = fine['status']
             fines_output.append(data)
         
         response_object = {
