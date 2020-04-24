@@ -19,7 +19,7 @@ CREATE TABLE loan (l_id INTEGER PRIMARY KEY,
                       due_date DATE NOT NULL,
                       librarian_id INT NOT NULL,
 					  status varchar(13) NOT NULL,
-                      FOREIGN KEY(b_id) REFERENCES bookItem(bi_id)
+                      FOREIGN KEY(bi_id) REFERENCES bookItem(bi_id)
 					  ON DELETE NO ACTION,
                       FOREIGN KEY(m_id) REFERENCES member(m_id)
 					  ON DELETE NO ACTION,

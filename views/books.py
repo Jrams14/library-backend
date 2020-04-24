@@ -11,7 +11,7 @@ def checkout_book():
         cur = db.cursor()
 
         # Check if book is already checked out by a member
-        cur.execute("SELECT * FROM loan where b_id= ? AND status='active'", (data['b_id']))
+        cur.execute("SELECT * FROM loan where bi_id= ? AND status='active'", (data['b_id']))
         db.commit()
 
         loaned_book = cur.fetchone()
@@ -22,7 +22,7 @@ def checkout_book():
             }
             return jsonify(response_object)
 
-        cur.execute("INSERT INTO loan(b_id, m_id, checkout_date, due_date, librarian_id, status) VALUES (?,?,?,?,?,?)", (data['b_id'], data['m_id'], date.today(), data['return_date'], data['l_id'], 
+        cur.execute("INSERT INTO loan(bi_id, m_id, checkout_date, due_date, librarian_id, status) VALUES (?,?,?,?,?,?)", (data['b_id'], data['m_id'], date.today(), data['return_date'], data['l_id'], 
         'active'))
         db.commit()
         response_object = {
