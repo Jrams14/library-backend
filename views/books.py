@@ -11,7 +11,7 @@ def checkout_book():
         cur = db.cursor()
 
         # Check if book is already checked out by a member
-        cur.execute("SELECT * FROM loan where bi_id= ? AND status='active'", (data['b_id']))
+        cur.execute("SELECT * FROM loan where bi_id = ? AND status = 'active'", (data['b_id']))
         db.commit()
 
         loaned_book = cur.fetchone()
@@ -65,20 +65,23 @@ def returnBook():
     try:
         db = get_db()
         cur = db.cursor()
+        # Start Transaction
+        cur.execute("BEGIN")
 
-        cur.execute("UPDATE loan SET status = 'complete' WHERE bi_id = ?", data["bi_id"])
-        cur.execute("SELECT * FROM loan where bi_id = ?", data["bi_id"])
+        cur.execute("SELECT * FROM loan where bi_id = ? AND status = 'active'", data["bi_id"])
 
-        db.commit()
         loan = cur.fetchone()
         
         # Create fine if returned past due date
         return_date = dateutil.parser.parse(loan['due_date']).date()
         if return_date < date.today():
+            print('im true')
             amount = (date.today() - return_date).days * 0.5
             cur.execute('INSERT INTO fine (l_id, amount, status) VALUES(?, ?, ?)', [loan['l_id'], amount, 'active'])
-            db.commit()
 
+        # Transaction successful, set loan status to complete
+        cur.execute("UPDATE loan SET status = 'complete' WHERE bi_id = ?", data["bi_id"])
+        cur.execute("COMMIT")
         cur.close()
         
         response_object = {
@@ -88,6 +91,8 @@ def returnBook():
 
     except Exception as ex:
         print(ex)
+        # There was an error, rollback transation
+        cur.execute("ROLLBACK")
         response_object = {
             'status': 'fail'
         }

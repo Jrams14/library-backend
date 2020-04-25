@@ -50,11 +50,13 @@ def getStatus(m_id):
             data['ISBN'] = loan['ISBN']
             data['title'] = loan['title']
             data['author'] = loan['author']
+            data['year'] = loan['year']
             loans_output.append(data)
 
         fines_output = []
         for fine in fines:
             data = {}
+            data['loan'] = fine['l_id']
             data['amount'] = fine['amount']
             data['status'] = fine['status']
             fines_output.append(data)
