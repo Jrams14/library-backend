@@ -32,7 +32,7 @@ CREATE TABLE librarian (librarian_id INTEGER PRIMARY KEY,
                       password TEXT NOT NULL);
 CREATE TABLE bookItem (bi_id integer PRIMARY KEY,
 					  ISBN varchar(13) NOT NULL,
-					  FOREIGN KEY (isbn) REFERENCES book(ISBN));
+					  FOREIGN KEY (ISBN) REFERENCES book(ISBN));
 CREATE TABLE member (m_id INTEGER PRIMARY KEY,
 					  name char(50),
 					  phone varchar(22) NOT NULL,

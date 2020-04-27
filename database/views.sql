@@ -1,0 +1,2 @@
+CREATE VIEW frequent_books AS
+    SELECT title, author, year FROM (SELECT *, COUNT(*) as count  FROM loan INNER JOIN bookItem on loan.bi_id = bookItem.bi_id INNER JOIN book on bookItem.ISBN = book.ISBN  GROUP BY book.ISBN ORDER BY count LIMIT 5);

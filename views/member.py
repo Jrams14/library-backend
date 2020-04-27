@@ -7,7 +7,7 @@ def addMember():
     try:
         db = get_db()
         cur = db.cursor()
-        cur.execute("INSERT INTO member(name, phone, email, balance) VALUES (?,?,?,?)", (data['name'], data['phone'], data['email'], data['balance']))
+        cur.execute("INSERT INTO member(name, phone, email, balance) VALUES (?,?,?,?)", [data['name'], data['phone'], data['email'], '0'])
         db.commit()
         response_object = {
             'status': 'success'

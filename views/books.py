@@ -11,7 +11,7 @@ def checkout_book():
         cur = db.cursor()
 
         # Check if book is already checked out by a member
-        cur.execute("SELECT * FROM loan where bi_id = ? AND status = 'active'", (data['b_id']))
+        cur.execute("SELECT * FROM loan where bi_id = ? AND status = 'active'", [data['b_id']])
         db.commit()
 
         loaned_book = cur.fetchone()
@@ -39,19 +39,26 @@ def checkout_book():
         return jsonify(response_object)
 
 @app.route('/addBook', methods=['POST'])
-def addBook():
+def add_book():
     data = request.get_json()
     try:
         db = get_db()
         cur = db.cursor()
+        cur.execute("BEGIN")
         cur.execute("INSERT INTO book(ISBN, author, title, year, pages, numOfCopies) VALUES (?,?,?,?,?,?)" , (data['ISBN'], data['author'], data['title'], data['year'], data['pages'], data['numOfCopies']))
-        db.commit()
+        
+        for i in range(int(data['numOfCopies'])):
+            cur.execute("INSERT INTO bookItem(ISBN) VALUES (?)", [data['ISBN']])
+
+        cur.execute("COMMIT")
         response_object = {
             'status': 'success'
         }
         return jsonify(response_object)
 
-    except:
+    except Exception as ex:
+        print(ex)
+        cur.execute("ROLLBACK")
         response_object = {
             'status': 'fail',
         }
@@ -59,7 +66,7 @@ def addBook():
 
 
 @app.route('/return', methods = ["POST"])
-def returnBook():
+def return_book():
     data = request.get_json()
 
     try:
@@ -68,19 +75,18 @@ def returnBook():
         # Start Transaction
         cur.execute("BEGIN")
 
-        cur.execute("SELECT * FROM loan where bi_id = ? AND status = 'active'", data["bi_id"])
+        cur.execute("SELECT * FROM loan where bi_id = ? AND status = 'active'", [data["bi_id"]])
 
         loan = cur.fetchone()
         
         # Create fine if returned past due date
         return_date = dateutil.parser.parse(loan['due_date']).date()
         if return_date < date.today():
-            print('im true')
             amount = (date.today() - return_date).days * 0.5
             cur.execute('INSERT INTO fine (l_id, amount, status) VALUES(?, ?, ?)', [loan['l_id'], amount, 'active'])
 
         # Transaction successful, set loan status to complete
-        cur.execute("UPDATE loan SET status = 'complete' WHERE bi_id = ?", data["bi_id"])
+        cur.execute("UPDATE loan SET status = 'complete' WHERE bi_id = ?", [data["bi_id"]])
         cur.execute("COMMIT")
         cur.close()
         
@@ -91,7 +97,7 @@ def returnBook():
 
     except Exception as ex:
         print(ex)
-        # There was an error, rollback transation
+        # There was an error, rollback transaction
         cur.execute("ROLLBACK")
         response_object = {
             'status': 'fail'
@@ -99,7 +105,7 @@ def returnBook():
         return jsonify(response_object)
 
 @app.route('/search', methods = ["POST"])
-def searchBook():
+def search_book():
     data = request.get_json()
 
     db = get_db()
@@ -107,7 +113,7 @@ def searchBook():
 
     print(data['title'])
 
-    cur.execute("SELECT * FROM book where title LIKE ? ", [data['title'] + '%'])
+    cur.execute("SELECT * FROM book where title LIKE ? ", ['%' + data['title'] + '%'])
 
     books = cur.fetchall()
 
@@ -128,12 +134,12 @@ def searchBook():
     return jsonify(response_object)
 
 @app.route('/frequent', methods = ["GET"])
-def getFrequentBooks():
+def get_frequent_books():
     db = get_db()
     cur = db.cursor()
 
     try:
-        cur.execute('SELECT title, author, year FROM (SELECT *, COUNT(*) as count  FROM loan INNER JOIN bookItem on loan.bi_id = bookItem.bi_id INNER JOIN book on bookItem.ISBN = book.ISBN  GROUP BY book.ISBN ORDER BY count LIMIT 5)')
+        cur.execute('SELECT * FROM frequent_books')
 
         books = cur.fetchall()
 
@@ -148,6 +154,27 @@ def getFrequentBooks():
         response_object = {
             'status': 'success',
             'books': books_output
+        }
+        return jsonify(response_object)
+    except Exception as ex:
+        print(ex)
+        response_object = {
+            'status': 'fail'
+        }
+        return jsonify(response_object)
+
+@app.route('/payFine', methods = ["POST"])
+def pay_fine():
+    data = request.get_json()
+
+    db = get_db()
+    cur = db.cursor()
+
+    try:
+        cur.execute("UPDATE fine SET status = 'complete' WHERE l_id = ?", [data['l_id']])
+        db.commit()
+        response_object = {
+            'status': 'success'
         }
         return jsonify(response_object)
     except Exception as ex:
